@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "dutch_frequency_analyzer"
+version = "0.1.0"
+description = ""
+authors = ["David Lysenko <lysenkodavid@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+nltk = "^3.9.1"
+spacy = "^3.7.6"
+click = "^8.1.7"
+azure-cognitiveservices-speech = "^1.40.0"
+deepl = "^1.19.1"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.3.0"
+
+[tool.poetry.scripts]
+analyzer = "dutch_frequency_analyzer.analyzer:analyzer"
+finder = "dutch_frequency_analyzer.sentence_finder:finder"
+merger = "dutch_frequency_analyzer.merger:merger"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

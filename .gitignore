@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.DS_Store
+known.txt
+*.known.txt
+unknown.txt
+*.unknown.txt
+.deepl_cache.txt
+out.*
