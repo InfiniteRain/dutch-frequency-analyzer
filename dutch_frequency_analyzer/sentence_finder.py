@@ -241,7 +241,7 @@ def find_candidates(nlp, word, known_words, existing_sentences):
     return [
         (s.replace("\t", " "), t.replace("\t", " "), a)
         for s, (t, _, a) in sorted(
-            example_sentences.items(), key=lambda entry: entry[1][1]
+            example_sentences.items(), key=lambda entry: (entry[1][1], len(entry[0]))
         )
     ]
 
