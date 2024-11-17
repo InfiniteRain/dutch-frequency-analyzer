@@ -8,12 +8,12 @@ from .reverso import ReversoContextAPI
 from nltk.corpus import stopwords
 from .shared import (
     get_model,
-    load_dictionary,
     load_known_words,
     load_unknown_words,
     default_known_words_file_name,
     add_known_word,
     justify,
+    term_lookup,
 )
 from typing import Dict, Tuple, List
 from pathlib import Path
@@ -33,6 +33,7 @@ speech_config.speech_synthesis_voice_name = "nl-NL-MaartenNeural"
 speech_config.set_speech_synthesis_output_format(
     speechsdk.SpeechSynthesisOutputFormat.Audio24Khz96KBitRateMonoMp3
 )
+indent = " " * 4
 
 
 @click.command()
@@ -50,7 +51,6 @@ def finder(word_list, output_dir, resume, known_words_file):
 
     nlp = get_model()
 
-    dictionary = load_dictionary()
     known_words = load_known_words(known_words_file)
     unknown_words = list(load_unknown_words(word_list).keys())
     existing_sentences = load_sentences(output_dir)
@@ -67,6 +67,7 @@ def finder(word_list, output_dir, resume, known_words_file):
 
         current_index = 0
         deepl_translation = None
+        etimologies = term_lookup(word)
 
         while True:
             sentence, translation, analysis = candidates[current_index]
@@ -91,7 +92,7 @@ def finder(word_list, output_dir, resume, known_words_file):
 
             click.echo(f"Sentence:".ljust(justify), nl=False)
 
-            is_not_first = False
+            last_text = None
             for text, text_analysis in analysis:
                 fg = None
 
@@ -102,11 +103,15 @@ def finder(word_list, output_dir, resume, known_words_file):
                     case "future":
                         fg = "yellow"
 
-                if is_not_first and text[0].isalnum():
+                if (
+                    last_text is not None
+                    and (text == "(" or text[0].isalnum())
+                    and last_text != "("
+                ):
                     click.echo(" ", nl=False)
 
                 click.secho(f"{text}", nl=False, fg=fg)
-                is_not_first = True
+                last_text = text
 
             click.echo()
 
@@ -122,11 +127,36 @@ def finder(word_list, output_dir, resume, known_words_file):
             click.echo(f"{current_index + 1} out of {len(candidates)}")
             click.echo()
 
-            if word in dictionary:
-                for etimology_index, etimology in enumerate(dictionary[word]):
+            if etimologies is not None:
+                for etimology_index, etimology in enumerate(etimologies):
                     click.echo(f"Etimology {etimology_index + 1}:")
-                    for definition in etimology[2]:
-                        click.echo(f"\t- {definition[0]}")
+
+                    for definition_index, definition in enumerate(etimology):
+                        click.echo(
+                            f"{indent}- {definition["text"].replace("\n", f"\n{indent}  ")}"
+                        )
+
+                        if "form_words" not in definition:
+                            continue
+
+                        click.echo()
+
+                        for form_word in definition["form_words"]:
+                            for form_etimology_index, form_itemology in enumerate(
+                                form_word["etimologies"]
+                            ):
+                                click.echo(
+                                    f"{indent}  Etimology {form_etimology_index + 1} for {form_word["text"]}:"
+                                )
+
+                                for form_definition in form_itemology:
+                                    click.echo(
+                                        f"{indent}{indent}  - {form_definition["text"]}"
+                                    )
+
+                        if definition_index != len(etimology) - 1:
+                            click.echo()
+
                 click.echo()
 
             click.echo("y: accept the proposed candidate, go to the next word")

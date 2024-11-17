@@ -7,13 +7,13 @@ from .shared import (
     load_known_words,
     load_unknown_words,
     add_known_word,
-    load_dictionary,
     justify,
 )
 
 nltk.download("stopwords", quiet=True)
 
 stopword_list = stopwords.words("dutch")
+dutch_words_file_name = "dutch_words.txt"
 
 
 @click.command()
@@ -29,7 +29,7 @@ def analyzer(file_name, known_words_file, unknown_words_file):
 
     nlp = get_model()
     known_words = load_known_words(known_words_file)
-    dutch_dictionary = load_dictionary()
+    dutch_words = load_dutch_words()
     word_map = {}
     total = 0
     num_lines = sum(1 for _ in open(file_name))
@@ -44,7 +44,7 @@ def analyzer(file_name, known_words_file, unknown_words_file):
                 line = line.lower()
                 for lemma in lemmatize(nlp, line):
                     lemma = lemma.lower()
-                    if not is_allowed_word(lemma, dutch_dictionary, known_words):
+                    if not is_allowed_word(lemma, dutch_words, known_words):
                         continue
 
                     if lemma not in word_map:
@@ -128,3 +128,13 @@ def is_allowed_word(word, dictionary, known_words):
         and word not in known_words
         and word in dictionary
     )
+
+
+def load_dutch_words():
+    words = set()
+
+    with open(dutch_words_file_name) as file:
+        for line in file:
+            words.add(line.strip())
+
+    return words
