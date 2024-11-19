@@ -1,0 +1,27 @@
+<script>
+  for (const selector of ["html", "body", ".card"]) {
+    const elem = document.querySelector(selector);
+    if (!elem.style.height) {
+      elem.style.height = `${window.innerHeight}px`;
+    }
+  }
+
+  setTimeout(() => {
+    const elem = document.querySelector(".body");
+    if (!elem.style.height) {
+      elem.style.height = `${window.innerHeight - 64}px`;
+    }
+  }, 0);
+</script>
+
+<div class="body">
+  <div class="sentence">
+    <div class="bigger">{{Sentence}}</div>
+    <div class="bigger">{{Sentence Translation}}</div>
+  </div>
+  <hr />
+  <div class="bigger">{{Word}}</div>
+  <div class="definition">{{Word Definition}}</div>
+</div>
+
+<div class="footer">{{Sentence Audio}}</div>

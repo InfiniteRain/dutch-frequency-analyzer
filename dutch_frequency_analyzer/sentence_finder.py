@@ -14,6 +14,8 @@ from .shared import (
     add_known_word,
     justify,
     term_lookup,
+    load_sentences,
+    output_file_name,
 )
 from typing import Dict, Tuple, List
 from pathlib import Path
@@ -24,7 +26,6 @@ stopword_list = stopwords.words("dutch")
 sentence_limit = 250
 deepl_translator = deepl.Translator(os.environ.get("DEEPL_KEY") or "")
 deepl_cache_file_name = ".deepl_cache.txt"
-output_file_name = "-output.txt"
 speech_config = speechsdk.SpeechConfig(
     subscription=os.environ.get("SPEECH_KEY"),
     region=os.environ.get("SPEECH_REGION"),
@@ -208,30 +209,6 @@ def finder(word_list, output_dir, resume, known_words_file):
             click.echo()
 
     click.echo("Done!")
-
-
-def load_sentences(output_dir):
-    sentences = {}
-
-    try:
-        file = open(f"{output_dir}/{output_file_name}")
-    except IOError:
-        return sentences
-
-    with file:
-        for line in file:
-            line = line.strip()
-
-            if line == "":
-                continue
-
-            split = line.split("\t")
-            word = split[0].strip()
-            sentence = split[1].strip()
-
-            sentences[word] = sentence
-
-    return sentences
 
 
 def find_candidates(nlp, word, known_words, existing_sentences):

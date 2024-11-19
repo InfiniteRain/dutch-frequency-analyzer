@@ -37,7 +37,7 @@ def analyzer(file_name, known_words_file, unknown_words_file):
     with file:
         with click.progressbar(
             file,
-            label=f"Analyzing contents",
+            label="Analyzing contents",
             length=num_lines,
         ) as bar:
             for line in bar:

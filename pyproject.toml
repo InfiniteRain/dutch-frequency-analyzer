@@ -13,11 +13,13 @@ azure-cognitiveservices-speech = "^1.40.0"
 deepl = "^1.19.1"
 beautifulsoup4 = "^4.12.3"
 lxml = "^5.3.0"
+genanki = "^0.13.1"
 
 [tool.poetry.scripts]
 analyzer = "dutch_frequency_analyzer.analyzer:analyzer"
 finder = "dutch_frequency_analyzer.sentence_finder:finder"
 merger = "dutch_frequency_analyzer.merger:merger"
+generator = "dutch_frequency_analyzer.deck_generator:generator"
 
 [build-system]
 requires = ["poetry-core"]

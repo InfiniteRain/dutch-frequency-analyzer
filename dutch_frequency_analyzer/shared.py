@@ -2,12 +2,17 @@ import subprocess
 import spacy
 import urllib.parse
 import requests
-from bs4 import BeautifulSoup
+import warnings
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 
 spacy_model_name = "nl_core_news_lg"
 default_known_words_file_name = "known.txt"
+output_file_name = "-output.txt"
 justify = 25
 wiktionary_api = "https://en.wiktionary.org/api/rest_v1/page/definition"
+
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
 def lemmatize(nlp: spacy.language.Language, text):
@@ -79,8 +84,16 @@ def term_lookup(term, lookup_form=True):
     encoded_term = urllib.parse.quote_plus(term.lower())
     request = requests.get(f"{wiktionary_api}/{encoded_term}")
 
-    if request.status_code != 200:
+    if (
+        request.status_code == 404
+        or request.status_code >= 300
+        and request.status_code < 400
+    ):
         return None
+
+    if request.status_code >= 400:
+        print(request.content)
+        raise Exception("Error returned from the Wiktionary API")
 
     response_json = request.json()
 
@@ -176,3 +189,38 @@ def term_lookup(term, lookup_form=True):
         out_etimologies.append(out_definitions)
 
     return out_etimologies
+
+
+def load_sentences(output_dir, extended=False):
+    sentences = {}
+
+    try:
+        file = open(f"{output_dir}/{output_file_name}")
+    except IOError:
+        return sentences
+
+    with file:
+        for line in file:
+            line = line.strip()
+
+            if line == "":
+                continue
+
+            split = line.split("\t")
+            word = split[0].strip()
+            sentence = split[1].strip()
+            translation = split[2].strip()
+            audio = split[3].strip()
+
+            sentences[word] = (
+                sentence
+                if not extended
+                else {
+                    "word": word,
+                    "sentence": sentence,
+                    "translation": translation,
+                    "audio": audio,
+                }
+            )
+
+    return sentences
